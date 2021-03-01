@@ -1,18 +1,44 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <button @click="workerTest()">worker!!</button>
+    {{ this.reload }}
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
+import Worker1 from 'worker-loader!@/workers/worker1'
 export default {
   name: 'Home',
   components: {
-    HelloWorld
+  },
+  data () {
+    return {
+      reload: 0
+    }
+  },
+  methods: {
+    workerTest: function () {
+      const worker = new Worker1()
+      worker.onmessage = e => {
+        const { data } = e
+        this.reload = data
+        console.log('data', data)
+        worker.terminate()
+      }
+      worker.postMessage(20)
+    },
+    workerTestLoop: function () {
+      for (let i = 0; i < 10; i++) {
+        const worker = new Worker1()
+        worker.onmessage = e => {
+          const { data } = e
+          this.reload += data
+          worker.terminate()
+        }
+        worker.postMessage(20)
+      }
+    }
   }
 }
 </script>
